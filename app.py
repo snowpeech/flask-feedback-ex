@@ -116,8 +116,8 @@ def show_tweets(username):
 @app.route("/users/<username>/feedback/add", methods=["GET", "POST"])
 def add_feedback(username):
     if session['username'] != username:
-        flash("You don't have permission to do this")
-        return redirect('/login')
+        flash("You don't have permission to add a post to this account", 'danger')
+        return redirect(f'/users/{username}')
     
     form = FeedbackForm()
 
@@ -137,8 +137,9 @@ def update_feedback(feedback_id):
     fdbk = Feedback.query.get_or_404(feedback_id)
 
     if session['username'] != fdbk.username:
-        flash("You don't have permission to do this")
-        return redirect('/login')
+        user = session['username']
+        flash("You don't have permission to edit that post", "danger")
+        return redirect(f'/users/{user}')
     
     form = FeedbackForm(obj=fdbk)
     
@@ -166,23 +167,20 @@ def delete_user(username):
     return redirect('/')
 
 
+# POST /feedback/<feedback-id>/delete
+@app.route("/feedback/<int:feedback_id>/delete", methods=["POST"])
+def delete_feedback(feedback_id):    
+    user = session['username']
+    fdbk = Feedback.query.get_or_404(feedback_id)
 
-@app.route("/tweets/<int:id>", methods=["POST"])
-def delete_feedback(id):
-    if 'username' not in session:
-        flash("Please log in first", 'danger')
-        return redirect('/login')
-
-    tweet = Tweet.query.get_or_404(id)
-    if tweet.username == session['username']:
-        db.session.delete(tweet)
-        db.session.commit()
-        flash("Tweet deleted", 'info')
-        return redirect('/tweets')
-    
-    flash("You don't have permission to do that", 'danger')
-    return redirect('/tweets')
-
+    if user != fdbk.username:
+        flash("You don't have permission to delete that post", "danger")
+        return redirect(f'/users/{user}')
+     
+    db.session.delete(fdbk)
+    db.session.commit()
+    flash("Feedback deleted", 'info')
+    return redirect(f'/users/{user}')
 
 
 @app.route("/logout")
