@@ -112,10 +112,7 @@ def show_tweets(username):
 #     # else:
 #     return render_template("tweets.html", form=form, tweets=all_tweets)
 
-# GET 
-# Display a form to add feedback Make sure that only the user who is logged in can see this form
-# POST /users/<username>/feedback/add
-# Add a new piece of feedback and redirect to /users/<username> — Make sure that only the user who is logged in can successfully add feedback
+
 @app.route("/users/<username>/feedback/add", methods=["GET", "POST"])
 def add_feedback(username):
     if session['username'] != username:
@@ -124,8 +121,36 @@ def add_feedback(username):
     
     form = FeedbackForm()
 
-    return render_template("add_feedback.html", form=form)
+    if form.validate_on_submit():
+        title=form.title.data 
+        content=form.content.data 
+        new_post = Feedback(title=title,content=content, username=username)
+        db.session.add(new_post)
+        db.session.commit()
+        flash(f"Feedback Submitted!", 'success')
+        return redirect(f'/users/{username}')
 
+    return render_template("add_feedback.html", form=form, username=username)
+
+@app.route("/feedback/<int:feedback_id>/update", methods=["GET", "POST"])
+def update_feedback(feedback_id):
+    fdbk = Feedback.query.get_or_404(feedback_id)
+
+    if session['username'] != fdbk.username:
+        flash("You don't have permission to do this")
+        return redirect('/login')
+    
+    form = FeedbackForm(obj=fdbk)
+    
+    if form.validate_on_submit():
+        fdbk.title=form.title.data 
+        fdbk.content=form.content.data 
+        
+        db.session.commit()
+        flash(f"Feedback Updated!", 'success')
+        return redirect(f'/users/{fdbk.username}')
+
+    return render_template("edit_feedback.html", form=form, feedback_id=feedback_id)
 
 @app.route("/users/<username>/delete", methods=["POST"])
 def delete_user(username):

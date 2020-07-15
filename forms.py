@@ -17,4 +17,4 @@ class LoginForm(FlaskForm):
 
 class FeedbackForm(FlaskForm):
     title=StringField("Title", validators=[InputRequired(), length(max=100, message="Titles must be 100 characters or less")])
-    text = TextAreaField("Feedback Text", validators=[InputRequired()] ) 
+    content = TextAreaField("Feedback Text", validators=[InputRequired()] ) 
