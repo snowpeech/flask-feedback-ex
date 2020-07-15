@@ -1,0 +1,54 @@
+{% extends 'base.html' %} {% block content %}
+
+<h1 class="display-4">User Profile</h1>
+<div class="container border border-secondary rounded p-2 mb-4">
+  <div class="m-1">Username: {{user.username}}</div>
+  <div class="m-1">Email: {{user.email}}</div>
+  <div class="m-1">Name: {{user.first_name}} {{user.last_name}}</div>
+
+  {% if session['username'] == user.username %}
+  <form
+    style="display: inline;"
+    action="/users/{{user.username}}/delete"
+    method="POST"
+  >
+    <button class="btn btn-sm btn-danger mb-1 mt-2">Delete My Account</button>
+  </form>
+  {% endif %}
+</div>
+
+<h2 class="m-3">Feedback from {{user.username}}</h2>
+
+{% if session['username'] == user.username %}
+<a href="/users/{{user.username}}/feedback/add">Add feedback + </a>
+{% endif %}
+
+<!--  -->
+{% for post in posts %}
+<div>
+  <div class="card my-4">
+    <div class="card-body">
+      <h5 class="card-title text-primary font-weight-bold">{{post.title}}</h5>
+
+      <p class="card-text">
+        {{post.content}}
+      </p>
+
+      {% if session['username'] == post.username %}
+      <form
+        style="display: inline;"
+        action="/feedback/{{post.id}}/delete"
+        method="POST"
+      >
+        <button class="btn btn-sm btn-danger">X</button>
+      </form>
+
+      <a href="/feedback/{{post.id}}/update" class="btn btn-sm btn-secondary"
+        >Edit</a
+      >
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %} {% endblock %}
